@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Analysis Dashboard</title>
+    <!-- Link the new CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <h2>📊 Contract Risk Analysis Dashboard</h2>
+
+    <!-- DASHBOARD GRID -->
+    <div class="dashboard">
+        <div class="stat-box total" onclick="filterRisk('All')">
+            <div class="title">Total Clauses</div>
+            <div class="value">{{ results|length }}</div>
+        </div>
+        <div class="stat-box high" onclick="filterRisk('High')">
+            <div class="title">High Risk</div>
+            <div class="value">{{ high }}</div>
+        </div>
+        <div class="stat-box medium" onclick="filterRisk('Medium')">
+            <div class="title">Medium Risk</div>
+            <div class="value">{{ medium }}</div>
+        </div>
+        <div class="stat-box low" onclick="filterRisk('Low')">
+            <div class="title">Low Risk</div>
+            <div class="value">{{ low }}</div>
+        </div>
+    </div>
+
+    <!-- SUMMARY SECTION -->
+    <div class="summary-container">
+        <!-- AI RISK SCORE -->
+        <div class="summary-box">
+            <h3>📈 Overall Risk Score: <span style="font-size:1.5rem; color:var(--text-primary);">{{ overall_score
+                    }}%</span></h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: {{ overall_score }}%;">
+                    {{ overall_score }}%
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTO SUMMARY -->
+        <div class="summary-box">
+            <h3>🧠 AI Executive Summary</h3>
+            <p style="font-size: 1.1rem; margin:0;">{{ summary }}</p>
+
+            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
+                <a href="/download" class="action-btn">⬇ Download PDF Report</a>
+                <a href="/" class="action-btn"
+                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">⬅ Analyze
+                    Another</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIE CHART -->
+    <div class="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <!-- CLAUSES LIST -->
+    <div class="clause-list">
+        <h3 style="margin-bottom: 25px; padding-left: 20px;">Detailed Clause Breakdown</h3>
+
+        {% for item in results %}
+        <div class="card clause-card" data-risk="{{ item.risk }}">
+
+            <div class="card-content">
+                {{ item.clause | safe }}
+            </div>
+
+            <div class="card-meta">
+                <div>
+                    Risk Level:
+                    {% if item.risk == "High" %}
+                    <span class="badge high">High</span>
+                    {% elif item.risk == "Medium" %}
+                    <span class="badge medium">Medium</span>
+                    {% else %}
+                    <span class="badge low">Low</span>
+                    {% endif %}
+                </div>
+
+                <div>Risk Score: <strong style="color:var(--text-primary);">{{ item.score }}</strong></div>
+
+                {% if item.keywords %}
+                <div>
+                    Keywords:
+                    {% for k in item.keywords %}
+                    <span class="keyword-tag">{{ k }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="/" class="back-link">⬅ Back to Home</a>
+
+
+    <script>
+        // Filter clauses logic
+        function filterRisk(type) {
+            const cards = document.querySelectorAll('.clause-card');
+            cards.forEach(card => {
+                if (type === 'All' || card.getAttribute('data-risk') === type) {
+                    card.style.display = 'block';
+                    // re-trigger animation
+                    card.style.animation = 'none';
+                    card.offsetHeight; /* trigger reflow */
+                    card.style.animation = null;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Custom modern chart config
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        new Chart(document.getElementById("chart"), {
+            type: 'doughnut',
+            data: {
+                labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                datasets: [{
+                    data: [{{ high }}, {{ medium }}, {{ low }}],
+            backgroundColor: [
+            '#ef4444', /* Rose */
+            '#f59e0b', /* Amber */
+            '#10b981'  /* Emerald */
+        ],
+            borderColor: '#1e293b',
+            borderWidth: 2,
+            hoverOffset: 10
+        }]
+    },
+            options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: { size: 14 }
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+});
+    </script>
+
+</body>
+
+</html>

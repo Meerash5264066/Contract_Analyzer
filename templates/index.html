@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Risk Analyzer</title>
+    <!-- Link the new CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📄 Contract Risk Analyzer</h1>
+    <p>Paste your contract text or upload a PDF to scan for potential risks, liabilities, and critical clauses.</p>
+
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+
+        <textarea name="contract" placeholder="Paste your contract text here..."></textarea>
+
+        <div class="file-upload-wrapper">
+            <p style="margin: 0 0 10px 0; font-size: 0.9rem;">Or upload a PDF document:</p>
+            <input type="file" name="file" accept="application/pdf">
+        </div>
+
+        <button type="submit">Analyze Contract</button>
+
+    </form>
+</div>
+
+</body>
+</html>
